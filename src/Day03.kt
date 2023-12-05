@@ -77,19 +77,54 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return 0
+        height = input.size
+        width = input.first().length
+        val array = Array(height) { CharArray(width) }
+
+        val numbers = mutableListOf<Number>()
+        val symbols = mutableListOf<Symbol>()
+        input.forEachIndexed { index, s ->
+            array[index] = s.toCharArray()
+        }
+        array.forEachIndexed { i, line ->
+            var number: Number? = null
+            line.forEachIndexed { j, char ->
+                if (char.isDigit()) {
+                    if (number == null) number = Number()
+                    number!!.append(char, i, j)
+                } else {
+                    if (char == '*') symbols.add(Symbol(i to j))
+                    number?.let { numbers.add(it) }
+                    number = null
+                }
+            }
+            number?.let { numbers.add(it) }
+        }
+
+        var sum = 0
+
+        symbols.forEach { symbol ->
+            // find 2 numbers adjacent to symbol
+            val adjacents = numbers.filter { symbol.adjacent(it.coordinates) }
+            if (adjacents.size == 2) {
+                sum += adjacents.map { it.number }.reduce(Int::times)
+                numbers.removeAll(adjacents)
+            }
+        }
+
+        return sum
     }
 
     // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day03_test")
-    check(part1(testInput) == 4361)
+//    val testInput = readInput("Day03_test")
+//    check(part1(testInput) == 4361)
+//
+//    val input = readInput("Day03")
+//    part1(input).println()
 
-    val input = readInput("Day03")
-    part1(input).println()
-//
-//    val testInput2 = readInput("Day03_part2_test")
-//    check(part2(testInput2) == 0)
-//
-//    val input2 = readInput("Day03_part2")
-//    part2(input2).println()
+//    val testInput2 = Path("src/Day03_part2_test.txt").readLines()
+//    check(part2(testInput2) == 467835)
+
+    val input2 = readInput("Day03_part2")
+    part2(input2).println()
 }
